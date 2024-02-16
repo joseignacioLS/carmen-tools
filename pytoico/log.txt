@@ -1,0 +1,5 @@
+MSG: Starting
+MSG: Carpeta png ya existe
+MSG: Archivo test.png salvado como caca.ico
+MSG: Archivo test2.png salvado como test2.ico
+MSG: End
