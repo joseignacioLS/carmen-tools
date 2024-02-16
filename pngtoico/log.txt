@@ -1,5 +1,4 @@
 MSG: Starting
-MSG: Carpeta png ya existe
-MSG: Archivo test.png salvado como caca.ico
-MSG: Archivo test2.png salvado como test2.ico
+MSG: Carpeta png creada
+WAR: No hay archivos png
 MSG: End

@@ -53,7 +53,7 @@ def get_icon_name(icon_name, icon_names):
 def process_file(path, icon_sizes, icon_names):
     img = Image.open(path)
     name = get_icon_name(path[:-4], icon_names)
-    img.save(name + ".ico", sizes=icon_sizes)
+    img.save(name + ".ico", sizes=icon_sizes, bitmap_format="bmp")
     logger.log(f"Archivo {path} salvado como {name}.ico", "MSG")
     subprocess.call(f"copy {path} png\\{path} /y", shell=True)
     subprocess.call(f"del {path}", shell=True)
