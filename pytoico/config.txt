@@ -1,8 +1,0 @@
-#Resoluciones
-64
-48
-32
-24
-16
-#Nombres
-test	caca
