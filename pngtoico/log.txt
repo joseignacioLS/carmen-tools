@@ -1,4 +1,4 @@
 MSG: Starting
-MSG: Carpeta png creada
+MSG: Carpeta png ya existe
 WAR: No hay archivos png
 MSG: End

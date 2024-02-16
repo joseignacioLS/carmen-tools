@@ -1,47 +1,31 @@
 import os
 from PIL import Image
-import subprocess
-import re
 from logger import Logger
-from utils import load_file, create_folder
+from utils import file_opener, create_folder, get_content_section, move_file
 from contants import LOG_FILE, DATA_FILE
 
 
-def get_resolutions(file_content):
-    res_match = re.search("#Resoluciones[^#]+", file_content)
-    if not res_match:
+@get_content_section
+def get_resolutions(data):
+    resolutions = [(int(x), int(x)) for x in data]
+    if len(resolutions) == 0:
         logger.log("No existen resoluciones", "ERR")
         quit()
-    return [(int(x), int(x)) for x in res_match.group().strip().split("\n")[1:]]
+    return resolutions
 
 
-def get_names(file_content):
-    icon_names = {}
-    name_match = re.search("#Nombres[^#]+", file_content)
-    if name_match:
-        for pair in name_match.group().strip().split("\n")[1:]:
-            original, mod = pair.strip().split("\t")
-            icon_names[original] = mod
-    return icon_names
+@get_content_section
+def get_names(data):
+    names = {x.strip().split("\t")[0]: x.strip().split("\t")[1] for x in data}
+    return names
 
 
+@file_opener
 def process_data_content(file):
     content = file.read()
-    icon_sizes = get_resolutions(content)
-    icon_names = get_names(content)
+    icon_sizes = get_resolutions(content, "Resoluciones")
+    icon_names = get_names(content, "Nombres")
     return icon_sizes, icon_names
-
-
-def load_data_file():
-    def on_error(path):
-        logger.log(f"No se encuentra el archivo {path}", "ERR")
-        quit()
-    data = load_file(
-        DATA_FILE,
-        process_data_content,
-        on_error
-    )
-    return data
 
 
 def get_icon_name(icon_name, icon_names):
@@ -50,13 +34,12 @@ def get_icon_name(icon_name, icon_names):
     return icon_name
 
 
-def process_file(path, icon_sizes, icon_names):
+def process_png(path, icon_sizes, icon_names):
     img = Image.open(path)
     name = get_icon_name(path[:-4], icon_names)
     img.save(name + ".ico", sizes=icon_sizes, bitmap_format="bmp")
     logger.log(f"Archivo {path} salvado como {name}.ico", "MSG")
-    subprocess.call(f"copy {path} png\\{path} /y", shell=True)
-    subprocess.call(f"del {path}", shell=True)
+    move_file(path, f"png\\{path}")
 
 
 def main():
@@ -66,14 +49,14 @@ def main():
         lambda path: logger.log(f"Carpeta {path} ya existe", "MSG")
     )
 
-    icon_sizes, icon_names = load_data_file()
+    icon_sizes, icon_names = process_data_content(DATA_FILE, Logger)
 
     file_list = [x for x in os.listdir() if ".png" in x]
     if len(file_list) == 0:
         logger.log("No hay archivos png", "WAR")
 
     for archivo in file_list:
-        process_file(archivo, icon_sizes, icon_names)
+        process_png(archivo, icon_sizes, icon_names)
 
 
 if __name__ == "__main__":
