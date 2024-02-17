@@ -1,5 +1,7 @@
 # PNGTOICO
 
+**v.0.1.0**
+
 ## Descripción
 
 Script para convertir archivos en formato ```.png``` a un ```.ico``` en multiples resoluciones.

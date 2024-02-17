@@ -1,4 +1,5 @@
 build
 __pycache__
 *.spec
-build.bat
+upgrade.bat
+version_manager
