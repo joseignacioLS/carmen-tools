@@ -3,6 +3,7 @@ from PIL import Image
 from logger import Logger
 from utils import file_opener, create_folder, get_content_section, move_file
 from contants import LOG_FILE, DATA_FILE
+import sys
 
 
 class PngToIcoConverter:
@@ -37,7 +38,7 @@ class PngToIcoConverter:
         resolutions = [(int(x), int(x)) for x in data]
         if len(resolutions) == 0:
             self.logger.log("No existen resoluciones", "ERR")
-            quit()
+            sys.exit()
         self.icon_sizes = resolutions
 
     @get_content_section
