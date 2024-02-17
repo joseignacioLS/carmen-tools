@@ -1,6 +1,7 @@
 import os
 import re
 import subprocess
+import sys
 
 
 def file_opener(func):
@@ -11,7 +12,7 @@ def file_opener(func):
             return result
         except FileNotFoundError:
             kwargs["logger"].log(f"Archivo {kwargs['data_file']} no encontrado", "ERR")
-            quit()
+            sys.exit()
     return wrap
 
 
