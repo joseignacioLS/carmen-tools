@@ -1,6 +1,7 @@
 import os
 import re
 import subprocess
+import sys
 
 
 def file_opener(func):
@@ -11,16 +12,18 @@ def file_opener(func):
             return result
         except FileNotFoundError:
             kwargs["logger"].log(f"Archivo {kwargs['data_file']} no encontrado", "ERR")
-            quit()
+            sys.exit()
     return wrap
 
 
 def get_content_section(func):
+    def get_content_lines(content):
+        return content.strip().split("\n")[1:]
+
     def wrap(*args, **kwargs):
         match = re.search(f"#{kwargs['section']}[^#]+", kwargs['content'])
-        if not match:
-            return func(*args, [])
-        return func(*args, match.group().strip().split("\n")[1:])
+        return func(*args, get_content_lines(match.group()) if match else [])
+
     return wrap
 
 
