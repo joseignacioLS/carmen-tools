@@ -4,23 +4,23 @@ import subprocess
 
 
 def file_opener(func):
-    def wrap(*args):
+    def wrap(*args, **kwargs):
         try:
-            with open(args[0]) as file:
-                result = func(file)
+            with open(kwargs["data_file"]) as file:
+                result = func(*args, file)
             return result
         except FileNotFoundError:
-            args[1].log(f"Archivo {args[0]} no encontrado", "ERR")
+            kwargs["logger"].log(f"Archivo {kwargs['data_file']} no encontrado", "ERR")
             quit()
     return wrap
 
 
 def get_content_section(func):
-    def wrap(*args):
-        match = re.search(f"#{args[1]}[^#]+", args[0])
+    def wrap(*args, **kwargs):
+        match = re.search(f"#{kwargs['section']}[^#]+", kwargs['content'])
         if not match:
-            return func([])
-        return func(match.group().strip().split("\n")[1:])
+            return func(*args, [])
+        return func(*args, match.group().strip().split("\n")[1:])
     return wrap
 
 
