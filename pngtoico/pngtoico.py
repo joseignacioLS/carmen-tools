@@ -1,7 +1,8 @@
 import os
 from PIL import Image
-from logger import Logger
-from utils import file_opener, create_folder, get_content_section, move_file
+from tools.logger import Logger
+from utils import get_content_section
+from tools.fs import file_opener, create_folder, move_file
 from contants import LOG_FILE, DATA_FILE
 import sys
 
