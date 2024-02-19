@@ -2,7 +2,7 @@ import os
 from PIL import Image
 from tools.logger import Logger
 from utils import get_content_section
-from tools.fs import file_opener, create_folder, move_file
+from tools.fs import file_reader, create_folder, move_file
 from contants import LOG_FILE, DATA_FILE
 import sys
 
@@ -13,7 +13,7 @@ class PngToIcoConverter:
         self.icon_names = {}
         self.icon_sizes = []
         self.file_list = []
-        self.process_data_content(data_file=data_file, logger=self.logger)
+        self.process_data_content(data_file=data_file)
 
     def get_file_list(self):
         self.file_list = [x for x in os.listdir() if ".png" in x]
@@ -47,9 +47,8 @@ class PngToIcoConverter:
         names = {x.strip().split("\t")[0]: x.strip().split("\t")[1] for x in data}
         self.icon_names = names
 
-    @file_opener
-    def process_data_content(self, file):
-        content = file.read()
+    @file_reader
+    def process_data_content(self, content):
         self.get_resolutions(content=content, section="Resoluciones")
         self.get_names(content=content, section="Nombres")
 
