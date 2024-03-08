@@ -3,7 +3,7 @@ import re
 from PIL import Image
 from tools.logger import Logger
 from tools.commandline import getargs
-from utils import get_content_section
+from utils import get_content_section, generate_ico_layer
 from tools.fs import file_reader, create_folder, move_file, file_exists
 from contants import LOG_FILE, DATA_FILE
 import sys
@@ -32,15 +32,29 @@ class PngToIcoConverter:
 
         self.get_file_list()
         if args.get("-m") in [None, "c", "convert"]:
+            self.logger.log("Conversión de PNG a ICO", "MSG")
             for archivo in self.file_list:
                 self.process_png(archivo)
-
+        elif args.get("-m") in ["f", "fuse"]:
+            self.fuse_pngs()
         self.logger.log("End", "MSG")
 
     @get_content_section
     def get_resolutions(self, data):
         try:
-            resolutions = [(int(x), int(x)) for x in data]
+            high = []
+            low = []
+            switch = False
+            for row in data:
+                if row == "-":
+                    switch = True
+                    continue
+                if switch:
+                    low.append((int(row), int(row)))
+                else:
+                    high.append((int(row), int(row)))
+
+            resolutions = [high, low]
         except ValueError:
             self.logger.log("Formato incorrecto en las resoluciones", "ERR")
             sys.exit()
@@ -73,16 +87,65 @@ class PngToIcoConverter:
             path = os.path.abspath(sys.argv[0])
             global_config_path = os.path.join(os.path.dirname(path), data_file)
             if not file_exists(global_config_path):
-                self.logger.log("No Existe Configuración Global. Añade un archivo config.txt en la misma localización que el ejecutable.", "ERR")
+                self.logger.log(
+                    "No Existe Configuración Global. "
+                    "Añade un archivo config.txt en la misma localización que el ejecutable.",
+                    "ERR")
                 sys.exit()
             self.process_data_content(data_file=global_config_path)
 
+    def fuse_pngs(self):
+        self.logger.log("Fusión de PNGs a ICO", "MSG")
+
+        fs16, fs32 = [
+            [f for f in self.file_list
+             if "_16" in f],
+            [f for f in self.file_list
+             if "_32" in f]]
+
+        sizes_h = [(64, 64), (32, 32), (24, 24)]\
+            if len(self.icon_sizes[0]) == 0\
+            else self.icon_sizes[0]
+
+        sizes_l = [(16, 16)]\
+            if len(self.icon_sizes[1]) == 0\
+            else self.icon_sizes[1]
+
+        for f16, f32 in zip(fs16, fs32):
+            self.combine_pngs_into_ico([
+                {
+                    "src": f32,
+                    "sizes": sizes_h
+                },
+                {
+                    "src": f16,
+                    "sizes": sizes_l
+                }
+            ])
+            move_file(f16, f"png\\{f16}")
+            move_file(f32, f"png\\{f32}")
+
     def process_png(self, path):
         img = Image.open(path)
+        img = img.resize(self.icon_sizes[0][0])
         name = self.get_icon_name(path[:-4])
-        img.save(name + ".ico", sizes=self.icon_sizes, bitmap_format="bmp")
+        img.save(f"{name}.ico", sizes=self.icon_sizes[0] + self.icon_sizes[1], bitmap_format="bmp")
         self.logger.log(f"Archivo {path} salvado como {name}.ico", "MSG")
         move_file(path, f"png\\{path}")
+
+    def combine_pngs_into_ico(self, image_data):
+        layers = []
+        sizes = []
+        f_name = None
+        for data in image_data:
+            if f_name is None:
+                f_name = data["src"].split("_")[0]
+            img = Image.open(data["src"])
+            for size in data["sizes"]:
+                sizes.append(size)
+                layers.append(generate_ico_layer(img, size))
+        icon_name = self.get_icon_name(f_name)
+        layers[0].save(f"{icon_name}.ico", bitmap_format="bmp", sizes=sizes, append_images=layers[1:])
 
     def get_icon_name(self, icon_name):
         if icon_name in self.icon_names:

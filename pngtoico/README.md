@@ -1,6 +1,6 @@
 # PNGTOICO
 
-**v.0.4.0**
+**v.1.0.0**
 
 ## Descripción
 
@@ -42,6 +42,8 @@ Además, se genera un archivo ```log.txt``` que contiene información del proces
 ## Detalles sobre el archivo de configuración
 
 - En caso de no haber resoluciones, el programa no se ejecuta.
+- Las resoluciones deben ordenadores de mayor a menor.
+- Puede añadirse una linea con el caracter ```-``` para diferenciar las resoluciones altas de las bajas. Esto es útil cuando se generan icos a partir de dos imágenes. Las resoluciones altas usan la primera imagen y las altas para la segunda.
 - Los nombres de los archivos deben estar separados por tabulaciones.
 - El primer nombre de archivo indica el nombre del ```.png```, y el segundo el del ```.ico```.
 - Si no encuentra un nombre en el lista, usará el nombre original para nombrar al ```.ico```.

@@ -1,4 +1,5 @@
 import re
+from PIL import Image
 
 
 def get_content_section(func):
@@ -11,3 +12,9 @@ def get_content_section(func):
 
     return wrap
 
+
+def generate_ico_layer(img, size):
+    img = img.resize(size).convert("RGBA")
+    ico_layer = Image.new("RGBA", size, (255, 255, 255, 0))
+    ico_layer.paste(img, (0, 0))
+    return ico_layer
