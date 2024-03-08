@@ -1,7 +1,8 @@
 import os
-import inspect
+import re
 from PIL import Image
 from tools.logger import Logger
+from tools.commandline import getargs
 from utils import get_content_section
 from tools.fs import file_reader, create_folder, move_file, file_exists
 from contants import LOG_FILE, DATA_FILE
@@ -21,7 +22,8 @@ class PngToIcoConverter:
         if len(self.file_list) == 0:
             self.logger.log("No hay archivos png", "WAR")
 
-    def main(self):
+    @getargs
+    def main(self, args):
         create_folder(
             "png",
             lambda path: self.logger.log(f"Carpeta {path} creada", "MSG"),
@@ -29,15 +31,19 @@ class PngToIcoConverter:
         )
 
         self.get_file_list()
-
-        for archivo in self.file_list:
-            self.process_png(archivo)
+        if args.get("-m") in [None, "c", "convert"]:
+            for archivo in self.file_list:
+                self.process_png(archivo)
 
         self.logger.log("End", "MSG")
 
     @get_content_section
     def get_resolutions(self, data):
-        resolutions = [(int(x), int(x)) for x in data]
+        try:
+            resolutions = [(int(x), int(x)) for x in data]
+        except ValueError:
+            self.logger.log("Formato incorrecto en las resoluciones", "ERR")
+            sys.exit()
         if len(resolutions) == 0:
             self.logger.log("No existen resoluciones", "ERR")
             sys.exit()
@@ -45,14 +51,18 @@ class PngToIcoConverter:
 
     @get_content_section
     def get_names(self, data):
-        names = {x.strip().split("\t")[0]: x.strip().split("\t")[1] for x in data}
-        self.icon_names = names
+        try:
+            names = {x.strip().split("\t")[0]: x.strip().split("\t")[1] for x in data}
+            self.icon_names = names
+        except IndexError:
+            self.logger.log("Formato incorrecto en los nombres", "ERR")
+            sys.exit()
 
     @file_reader
     def process_data_content(self, content):
-        print(content)
-        self.get_resolutions(content=content, section="Resoluciones")
-        self.get_names(content=content, section="Nombres")
+        clean_content = re.sub(r"\n+", "\n", content).strip()
+        self.get_resolutions(content=clean_content, section="Resoluciones")
+        self.get_names(content=clean_content, section="Nombres")
 
     def get_config(self, data_file):
         if file_exists(data_file):
@@ -61,7 +71,11 @@ class PngToIcoConverter:
         else:
             self.logger.log("No Existe Configuración Local", "WRN")
             path = os.path.abspath(sys.argv[0])
-            self.process_data_content(data_file=os.path.join(os.path.dirname(path), data_file))
+            global_config_path = os.path.join(os.path.dirname(path), data_file)
+            if not file_exists(global_config_path):
+                self.logger.log("No Existe Configuración Global. Añade un archivo config.txt en la misma localización que el ejecutable.", "ERR")
+                sys.exit()
+            self.process_data_content(data_file=global_config_path)
 
     def process_png(self, path):
         img = Image.open(path)
