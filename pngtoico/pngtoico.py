@@ -31,12 +31,13 @@ class PngToIcoConverter:
         )
 
         self.get_file_list()
-        if args.get("-m") in [None, "c", "convert"]:
-            self.logger.log("Conversión de PNG a ICO", "MSG")
-            for archivo in self.file_list:
-                self.process_png(archivo)
-        elif args.get("-m") in ["f", "fuse"]:
-            self.fuse_pngs()
+        if len(self.file_list) > 0:
+            if args.get("-m") in [None, "c", "convert"]:
+                self.logger.log("Conversión de PNG a ICO", "MSG")
+                for archivo in self.file_list:
+                    self.process_png(archivo)
+            elif args.get("-m") in ["f", "fuse"]:
+                self.fuse_pngs()
         self.logger.log("End", "MSG")
 
     @get_content_section
@@ -74,6 +75,8 @@ class PngToIcoConverter:
 
     @file_reader
     def process_data_content(self, content):
+        if content is None:
+            self.logger.log("Archivo no encontrado", "WAR")
         clean_content = re.sub(r"\n+", "\n", content).strip()
         self.get_resolutions(content=clean_content, section="Resoluciones")
         self.get_names(content=clean_content, section="Nombres")
