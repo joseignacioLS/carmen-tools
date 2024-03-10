@@ -18,3 +18,7 @@ def generate_ico_layer(img, size):
     ico_layer = Image.new("RGBA", size, (255, 255, 255, 0))
     ico_layer.paste(img, (0, 0))
     return ico_layer
+
+
+def sort_resolutions(res):
+    return sorted(res, key=lambda x: x[0], reverse=True)

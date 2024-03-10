@@ -1,5 +1,3 @@
 MSG: Starting
 MSG: Cargando Configuracion Local
-MSG: Carpeta png ya existe
 WAR: No hay archivos png
-MSG: End
