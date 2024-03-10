@@ -21,12 +21,15 @@ class PngToIcoConverter:
 
     @get_content_section
     def get_resolutions(self, data):
+        if len(data) == 0:
+            self.logger.log("Formato incorrecto en las resoluciones", "ERR")
+            sys.exit()
         try:
             if "-" in data:
                 self.icon_sizes = [sort_resolutions([(int(x), int(x)) for x in group.split(";")])
                                    for group in ";".join(data).split(";-;")]
             else:
-                self.icon_sizes = [sort_resolutions(data), []]
+                self.icon_sizes = [sort_resolutions([(int(x), int(x)) for x in data]), []]
             if len(self.icon_sizes[0]) == 0:
                 self.logger.log("El grupo de altas resoluciones no puede estar vacio", "ERR")
                 sys.exit()
@@ -79,7 +82,6 @@ class PngToIcoConverter:
         name = self.get_icon_name(path[:-4])
         img.save(f"{name}.ico", sizes=self.icon_sizes[0] + self.icon_sizes[1], bitmap_format="bmp")
         self.logger.log(f"Archivo {path} salvado como {name}.ico", "MSG")
-        move_file(path, f"png\\{path}")
 
     def combine_pngs_into_ico(self, files):
         layers = []
@@ -92,7 +94,6 @@ class PngToIcoConverter:
             for size in sizes:
                 sizes_arr.append(size)
                 layers.append(generate_ico_layer(img, size))
-            move_file(src, f"png\\{src}")
 
         icon_name = self.get_icon_name(f_name)
         layers[0].save(f"{icon_name}.ico", bitmap_format="bmp", sizes=sizes_arr, append_images=layers[1:])
@@ -126,15 +127,17 @@ class PngToIcoConverter:
     def main(self):
         create_folder(
             "png",
-            lambda path: self.logger.log(f"Carpeta {path} creada", "MSG"),
-            lambda path: self.logger.log(f"Carpeta {path} ya existe", "MSG")
+            lambda x: self.logger.log(f"Carpeta {x} creada", "MSG"),
+            lambda x: self.logger.log(f"Carpeta {x} ya existe", "MSG")
         )
 
         for file in self.file_list:
             if len(file) == 1:
                 self.process_png(file[0])
-            if len(file) == 2:
+            elif len(file) == 2:
                 self.combine_pngs_into_ico(file)
+            for path in file:
+                move_file(path, f"png\\{path}")
 
         self.logger.log("End", "MSG")
 

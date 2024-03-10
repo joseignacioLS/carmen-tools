@@ -1,3 +1,5 @@
 MSG: Starting
 MSG: Cargando Configuracion Local
-WAR: No hay archivos png
+WAR: Error con la pareja c_high.png / c_low.png
+MSG: Carpeta png ya existe
+MSG: Archivo C.png salvado como C.ico
