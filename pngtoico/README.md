@@ -1,6 +1,6 @@
 # PNGTOICO
 
-**v.2.0.2**
+**v.2.0.4**
 
 ## Descripción
 

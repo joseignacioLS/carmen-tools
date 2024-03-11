@@ -4,7 +4,7 @@ from PIL import Image
 from tools.logger import Logger
 from utils import get_content_section, generate_ico_layer, sort_resolutions
 from tools.fs import file_reader, create_folder, move_file, file_exists
-from contants import LOG_FILE, DATA_FILE
+from contants import LOG_FILE, DATA_FILE, LOW_SUFFIX, HIGH_SUFFIX
 import sys
 
 
@@ -114,9 +114,9 @@ class PngToIcoConverter:
         cache = []
 
         for path in png_files:
-            if "_low" in path or "_high" in path:
-                high_path = path.replace("_low", "_high")
-                low_path = path.replace("_high", "_low")
+            if LOW_SUFFIX in path or HIGH_SUFFIX in path:
+                high_path = path.replace(LOW_SUFFIX, HIGH_SUFFIX)
+                low_path = path.replace(HIGH_SUFFIX, LOW_SUFFIX)
                 if file_exists(high_path) and file_exists(low_path):
                     if high_path in cache or low_path in cache:
                         continue
