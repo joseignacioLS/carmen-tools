@@ -21,8 +21,8 @@ class PngToIcoConverter:
 
     @get_content_section
     def get_resolutions(self, data):
-        if len(data) == 0:
-            self.logger.log("Formato incorrecto en las resoluciones", "ERR")
+        if data is None:
+            self.logger.log("No existe sección de resoluciones en el archivo de configuracion", "ERR")
             sys.exit()
         try:
             if "-" in data:
@@ -39,6 +39,9 @@ class PngToIcoConverter:
 
     @get_content_section
     def get_names(self, data):
+        if data is None:
+            self.logger.log("No existe sección de nombres en el archivo de configuración", "MSG")
+            return
         try:
             names = {x.strip().split("\t")[0]: x.strip().split("\t")[1] for x in data}
             self.icon_names = names
@@ -62,6 +65,7 @@ class PngToIcoConverter:
             self.logger.log("No Existe Configuración Local", "WRN")
             path = os.path.abspath(sys.argv[0])
             global_config_path = os.path.join(os.path.dirname(path), data_file)
+            self.logger.log("Cargando Configuracion Global", "MSG")
             if not file_exists(global_config_path):
                 self.logger.log(
                     "No Existe Configuración Global. "
