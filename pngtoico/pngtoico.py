@@ -3,7 +3,7 @@ import re
 from PIL import Image
 from tools.logger import Logger
 from utils import get_content_section, generate_ico_layer, sort_resolutions
-from tools.fs import file_reader, create_folder, move_file, file_exists
+from tools.fs import file_reader, create_folder, move_file, file_exists, get_files_in_path
 from contants import LOG_FILE, DATA_FILE, LOW_SUFFIX, HIGH_SUFFIX
 import sys
 
@@ -103,9 +103,9 @@ class PngToIcoConverter:
         layers[0].save(f"{icon_name}.ico", bitmap_format="bmp", sizes=sizes_arr, append_images=layers[1:])
         self.logger.log(f"Archivos {files[0]} y {files[1]} salvados como {icon_name}.ico", "MSG")
 
-    def get_file_list(self):
+    def get_file_list(self, ):
         self.file_list = []
-        png_files = sorted([x for x in os.listdir() if ".png" in x])
+        png_files = sorted(get_files_in_path(".", "png"))
 
         if len(png_files) == 0:
             self.logger.log("No hay archivos png", "WAR")
